@@ -28,9 +28,10 @@ export default function BitwiseTrainer() {
 
   const generateNumbers = () => {
     setNum1(Math.floor(Math.random() * 256)); // 8-bit number
-    setNum2(Math.floor(Math.random() * 256)); // 8-bit number
+    setNum2(Math.floor(Math.random() * 8)); // Bit position (0-7)
     setOperation(operations[Math.floor(Math.random() * operations.length)]);
   };
+
 
   useEffect(() => {
     generateNumbers();
@@ -81,7 +82,7 @@ export default function BitwiseTrainer() {
   const getBitVisualization = (num: number, highlightBit: number | null = null) => {
     return num.toString(2).padStart(8, '0').split('').map((bit, index) => (
       <span key={index} className={`inline-block w-8 text-center p-1 m-1 rounded ${
-        index === highlightBit ? 'bg-yellow-500 text-black' : 'bg-gray-700'
+        index === highlightBit ? 'bg-yellow-500 text-black font-bold' : 'bg-gray-700'
       }`}>
         {bit}
       </span>
@@ -89,49 +90,61 @@ export default function BitwiseTrainer() {
   };
 
   const getOperationDescription = () => {
-    const bitPosition = num2 % 8;
     switch (operation.name) {
       case 'Set bit':
       case 'Clear bit':
       case 'Toggle bit':
       case 'Check if bit is set':
-        return `${operation.description} (Bit position: ${bitPosition})`;
+        return `${operation.description} (Bit position: ${num2})`;
+      case 'Mask':
+        return `${operation.description} (Mask: ${num2.toString(2).padStart(8, '0')})`;
+      case 'Combine bytes':
+        return `${operation.description} (Num1 as high byte, Num2 as low byte)`;
       default:
         return operation.description;
     }
   };
 
   return (
-    <div className="p-4 max-w-md mx-auto bg-purple-900 rounded-xl shadow-md">
-      <h1 className="text-2xl font-bold mb-4 text-pink-300">Bitwise Trainer</h1>
-      <div className="mb-4">
-        <p className="text-cyan-300">Num1: <span className="text-yellow-300">{num1.toString(2).padStart(8, '0')} ({num1})</span></p>
-        <div className="my-2">{getBitVisualization(num1, operation.requiresSecondOperand ? num2 % 8 : null)}</div>
-        {operation.requiresSecondOperand && (
-          <>
-            <p className="text-cyan-300 mt-2">Num2: <span className="text-yellow-300">{num2.toString(2).padStart(8, '0')} ({num2})</span></p>
-            <div className="my-2">{getBitVisualization(num2)}</div>
-          </>
-        )}
+    <div className="min-h-screen bg-gradient-to-b from-purple-900 to-indigo-900 flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-purple-800 rounded-xl shadow-lg p-6 space-y-4">
+        <h1 className="text-3xl font-bold text-center text-pink-300">Bitwise Trainer</h1>
+        <div>
+          <p className="text-cyan-300">Num1: <span className="text-yellow-300 font-mono">{num1.toString(2).padStart(8, '0')} ({num1})</span></p>
+          <div className="my-2 flex justify-center">{getBitVisualization(num1, operation.requiresSecondOperand ? num2 : null)}</div>
+          {operation.requiresSecondOperand && (
+            <>
+              <p className="text-cyan-300 mt-2">
+                {operation.name === 'Mask' || operation.name === 'Combine bytes' 
+                  ? `Num2: ${num2.toString(2).padStart(8, '0')} (${num2})`
+                  : `Bit position: ${num2}`
+                }
+              </p>
+              {(operation.name === 'Mask' || operation.name === 'Combine bytes') && (
+                <div className="my-2 flex justify-center">{getBitVisualization(num2)}</div>
+              )}
+            </>
+          )}
+        </div>
+        <div>
+          <p className="text-cyan-300">Operation: <span className="text-pink-300 font-semibold">{operation.name}</span></p>
+          <p className="text-sm text-yellow-300">{getOperationDescription()}</p>
+        </div>
+        <Input
+          type="text"
+          value={userAnswer}
+          onChange={(e) => setUserAnswer(e.target.value)}
+          placeholder="Enter your answer in binary"
+          className="bg-purple-700 text-pink-300 border-pink-500 placeholder-pink-400"
+        />
+        <Button onClick={checkAnswer} className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white">
+          Submit
+        </Button>
+        <p className="text-xl text-center text-cyan-300">Score: <span className="text-yellow-300">{score}</span></p>
+        <p className={`text-lg text-center ${feedback.startsWith('Correct') ? 'text-green-400' : 'text-red-400'}`}>
+          {feedback}
+        </p>
       </div>
-      <div className="mb-4">
-        <p className="text-cyan-300">Operation: <span className="text-pink-300">{operation.name}</span></p>
-        <p className="text-sm text-yellow-300">{getOperationDescription()}</p>
-      </div>
-      <Input
-        type="text"
-        value={userAnswer}
-        onChange={(e) => setUserAnswer(e.target.value)}
-        placeholder="Enter your answer in binary"
-        className="mb-4 bg-indigo-800 text-pink-300 border-pink-500"
-      />
-      <Button onClick={checkAnswer} className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white mb-4">
-        Submit
-      </Button>
-      <p className="text-xl mb-2 text-cyan-300">Score: <span className="text-yellow-300">{score}</span></p>
-      <p className={`text-lg ${feedback.startsWith('Correct') ? 'text-green-400' : 'text-red-400'}`}>
-        {feedback}
-      </p>
     </div>
   );
 }
