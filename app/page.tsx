@@ -102,36 +102,40 @@ export default function BitwiseTrainer() {
   };
 
   return (
-    <div className="p-4 max-w-md mx-auto bg-purple-900 rounded-xl shadow-md">
-      <h1 className="text-2xl font-bold mb-4 text-pink-300">Bitwise Trainer</h1>
-      <div className="mb-4">
-        <p className="text-cyan-300">Num1: <span className="text-yellow-300">{num1.toString(2).padStart(8, '0')} ({num1})</span></p>
-        <div className="my-2">{getBitVisualization(num1, operation.requiresSecondOperand ? num2 % 8 : null)}</div>
-        {operation.requiresSecondOperand && (
-          <>
-            <p className="text-cyan-300 mt-2">Num2: <span className="text-yellow-300">{num2.toString(2).padStart(8, '0')} ({num2})</span></p>
-            <div className="my-2">{getBitVisualization(num2)}</div>
-          </>
-        )}
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 flex items-center justify-center p-4">
+      <div className="bg-black bg-opacity-50 backdrop-blur-md rounded-lg border border-pink-500 shadow-lg shadow-pink-500/50 p-8 max-w-md w-full">
+        <h1 className="text-3xl font-bold text-center mb-6 text-pink-500 tracking-wider">Bitwise Trainer</h1>
+        
+        <div className="mb-6">
+          <p className="text-cyan-300 mb-2">Num1: {num1.toString(2)} ({num1})</p>
+          <div className="grid grid-cols-8 gap-1 mb-4">
+            {num1.toString(2).padStart(8, '0').split('').map((bit, index) => (
+              <div key={index} className={`w-8 h-8 flex items-center justify-center rounded ${bit === '1' ? 'bg-pink-500' : 'bg-gray-700'} text-white`}>
+                {bit}
+              </div>
+            ))}
+          </div>
+          <p className="text-cyan-300">Operation: {operation}</p>
+          <p className="text-cyan-300 text-sm">{getOperationDescription()}</p>
+        </div>
+        
+        <Input
+          type="text"
+          value={userAnswer}
+          onChange={(e) => setUserAnswer(e.target.value)}
+          placeholder="Enter your answer in binary"
+          className="mb-4 bg-gray-800 text-white border-pink-500 focus:ring-cyan-300"
+        />
+        
+        <Button 
+          onClick={checkAnswer}
+          className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Submit
+        </Button>
+        
+        <p className="mt-4 text-center text-cyan-300">Score: {score}</p>
       </div>
-      <div className="mb-4">
-        <p className="text-cyan-300">Operation: <span className="text-pink-300">{operation.name}</span></p>
-        <p className="text-sm text-yellow-300">{getOperationDescription()}</p>
-      </div>
-      <Input
-        type="text"
-        value={userAnswer}
-        onChange={(e) => setUserAnswer(e.target.value)}
-        placeholder="Enter your answer in binary"
-        className="mb-4 bg-indigo-800 text-pink-300 border-pink-500"
-      />
-      <Button onClick={checkAnswer} className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white mb-4">
-        Submit
-      </Button>
-      <p className="text-xl mb-2 text-cyan-300">Score: <span className="text-yellow-300">{score}</span></p>
-      <p className={`text-lg ${feedback.startsWith('Correct') ? 'text-green-400' : 'text-red-400'}`}>
-        {feedback}
-      </p>
     </div>
   );
 }
