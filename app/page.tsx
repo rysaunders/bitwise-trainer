@@ -35,15 +35,16 @@ export default function BitwiseTrainer() {
   }, []);
 
   const calculateCorrectAnswer = () => {
+    const bitPosition = num2 % 8;
     switch (operation.name) {
       case 'Set bit':
-        return num1 | (1 << (num2 % 8));
+        return num1 | (1 << bitPosition);
       case 'Clear bit':
-        return num1 & ~(1 << (num2 % 8));
+        return num1 & ~(1 << bitPosition);
       case 'Toggle bit':
-        return num1 ^ (1 << (num2 % 8));
+        return num1 ^ (1 << bitPosition);
       case 'Check if bit is set':
-        return (num1 & (1 << (num2 % 8))) !== 0 ? 1 : 0;
+        return (num1 & (1 << bitPosition)) !== 0 ? 1 : 0;
       case 'Mask':
         return num1 & num2;
       case 'Combine bytes':
@@ -69,10 +70,33 @@ export default function BitwiseTrainer() {
       setScore(score + 1);
       setFeedback('Correct!');
     } else {
-      setFeedback(`Incorrect. The correct answer is ${correctAnswer.toString(2).padStart(8, '0')}.`);
+      setFeedback(`Incorrect. The correct answer is ${correctAnswer.toString(2).padStart(8, '0')} (${correctAnswer}).`);
     }
     setUserAnswer('');
     generateNumbers();
+  };
+
+  const getBitVisualization = (num: number, highlightBit: number | null = null) => {
+    return num.toString(2).padStart(8, '0').split('').map((bit, index) => (
+      <span key={index} className={`inline-block w-8 text-center p-1 m-1 rounded ${
+        index === highlightBit ? 'bg-yellow-500 text-black' : 'bg-gray-700'
+      }`}>
+        {bit}
+      </span>
+    ));
+  };
+
+  const getOperationDescription = () => {
+    const bitPosition = num2 % 8;
+    switch (operation.name) {
+      case 'Set bit':
+      case 'Clear bit':
+      case 'Toggle bit':
+      case 'Check if bit is set':
+        return `${operation.description} (Bit position: ${bitPosition})`;
+      default:
+        return operation.description;
+    }
   };
 
   return (
@@ -80,13 +104,17 @@ export default function BitwiseTrainer() {
       <h1 className="text-2xl font-bold mb-4 text-pink-300">Bitwise Trainer</h1>
       <div className="mb-4">
         <p className="text-cyan-300">Num1: <span className="text-yellow-300">{num1.toString(2).padStart(8, '0')} ({num1})</span></p>
+        <div className="my-2">{getBitVisualization(num1, operation.requiresSecondOperand ? num2 % 8 : null)}</div>
         {operation.requiresSecondOperand && (
-          <p className="text-cyan-300">Num2: <span className="text-yellow-300">{num2.toString(2).padStart(8, '0')} ({num2})</span></p>
+          <>
+            <p className="text-cyan-300 mt-2">Num2: <span className="text-yellow-300">{num2.toString(2).padStart(8, '0')} ({num2})</span></p>
+            <div className="my-2">{getBitVisualization(num2)}</div>
+          </>
         )}
       </div>
       <div className="mb-4">
         <p className="text-cyan-300">Operation: <span className="text-pink-300">{operation.name}</span></p>
-        <p className="text-sm text-yellow-300">{operation.description}</p>
+        <p className="text-sm text-yellow-300">{getOperationDescription()}</p>
       </div>
       <Input
         type="text"
